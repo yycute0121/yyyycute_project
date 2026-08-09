@@ -36,7 +36,8 @@ function openRecurringModal(id){
   const opts = (arr)=> arr.map(c=>`<option ${c===r?.category?'selected':''}>${esc(c)}</option>`).join('');
   const assetOpts = () => {
     const cashFirst = [...state.assets].sort((a,b)=> (a.type==='cash'?-1:1) - (b.type==='cash'?-1:1));
-    return '<option value="">无</option>' + cashFirst.map(a=>`<option value="${a.id}" ${a.id===r?.assetId?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)}</option>`).join('');
+    const first = cashFirst.length ? cashFirst[0] : null;
+    return '<option value="">无</option>' + cashFirst.map(a=>`<option value="${a.id}" ${(a.id===r?.assetId) || (!r?.assetId && first && a.id===first.id)?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)}</option>`).join('');
   };
   const body = `
     <div class="field"><label>类型</label>

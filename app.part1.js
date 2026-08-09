@@ -97,7 +97,8 @@ function updateAssetSelect(type){
   const sel = qs('rAsset');
   if (!sel) return;
   const cashFirst = [...state.assets].sort((a,b)=> (a.type==='cash'?-1:1) - (b.type==='cash'?-1:1));
-  sel.innerHTML = '<option value="">无</option>' + cashFirst.map(a=>`<option value="${a.id}">${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (¥${fmtMoney(a.balance)})</option>`).join('');
+  const first = cashFirst.length ? cashFirst[0] : null;
+  sel.innerHTML = '<option value="">无</option>' + cashFirst.map(a=>`<option value="${a.id}" ${first && a.id===first.id?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (¥${fmtMoney(a.balance)})</option>`).join('');
 }
 function fmtDateTime(iso){
   if(!iso) return '';

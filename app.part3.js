@@ -30,7 +30,7 @@ function openDepositModal(gid){
 
 /* ---- 定期收支弹窗（支持新增/编辑） ---- */
 function openRecurringModal(id){
-  const isEdit = !!id;
+  const isEdit = typeof id === 'string' && !!id;
   const r = isEdit ? state.recurring.find(x=>x.id===id) : null;
   if (isEdit && !r) return;
   const opts = (arr)=> arr.map(c=>`<option ${c===r?.category?'selected':''}>${esc(c)}</option>`).join('');
@@ -97,7 +97,7 @@ function generateRecurring(){
 
 /* ---- 资产弹窗（支持新增/编辑） ---- */
 function openAssetModal(id){
-  const isEdit = !!id;
+  const isEdit = typeof id === 'string' && !!id;
   const a = isEdit ? state.assets.find(x=>x.id===id) : null;
   if (isEdit && !a) return;
   const body = `
@@ -337,7 +337,7 @@ function bindEvents(){
   });
 
   // ===== 定期页事件 =====
-  qs('recAddBtn').addEventListener('click', openRecurringModal);
+  qs('recAddBtn').addEventListener('click', ()=> openRecurringModal());
   qs('recGenBtn').addEventListener('click', generateRecurring);
   qs('recurringList').addEventListener('click', e=>{
     const er=e.target.closest('[data-editrec]'); const dr=e.target.closest('[data-delrec]');
@@ -355,7 +355,7 @@ function bindEvents(){
   });
 
   // ===== 资产页事件 =====
-  qs('assetAddBtn').addEventListener('click', openAssetModal);
+  qs('assetAddBtn').addEventListener('click', ()=> openAssetModal());
   qs('assetList').addEventListener('click', e=>{
     const ea=e.target.closest('[data-editasset]'); const da=e.target.closest('[data-delasset]');
     if(ea) openAssetModal(ea.dataset.editasset);

@@ -96,9 +96,8 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;'
 function updateAssetSelect(type){
   const sel = qs('rAsset');
   if (!sel) return;
-  if (!state.assets.length) { sel.innerHTML='<option value="">暂无资产</option>'; return; }
   const cashFirst = [...state.assets].sort((a,b)=> (a.type==='cash'?-1:1) - (b.type==='cash'?-1:1));
-  sel.innerHTML = cashFirst.map(a=>`<option value="${a.id}">${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (¥${fmtMoney(a.balance)})</option>`).join('');
+  sel.innerHTML = '<option value="">无</option>' + cashFirst.map(a=>`<option value="${a.id}">${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (¥${fmtMoney(a.balance)})</option>`).join('');
 }
 function fmtDateTime(iso){
   if(!iso) return '';

@@ -2,12 +2,12 @@
  * 作用：把离线版 HTML 与图标缓存到手机本地，
  *       实现「断网 / 服务器休眠」也能打开 App。
  */
-// 2026-08-09g v8：JS/HTML 改网络优先策略，更新不再被旧缓存卡死
-const CACHE = 'xiaoyang-ledger-v8';
+// 2026-08-09h v9：manifest 也走网络优先（PWA start_url 改为 index.html，
+//                 避免旧缓存把 manifest.webmanifest 卡住导致启动页无法更新）
+const CACHE = 'xiaoyang-ledger-v9';
 const ASSETS = [
   './',
-  './offline.html',        // 单文件自包含版，断网核心
-  './manifest.webmanifest',
+  './offline.html',        // 单文件自包含版，断网兜底
   './apple-touch-icon-180.png',
   './icon-192.png',
   './icon.png',
@@ -34,12 +34,12 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// 拦截请求：HTML/JS 走「网络优先」（有网必拿最新代码，避免旧缓存卡住更新），
+// 拦截请求：HTML/JS/manifest 走「网络优先」（有网必拿最新代码，避免旧缓存卡住更新），
 // 其他静态资源（图标/图片等）走「缓存优先」保证离线可用。
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  const isDocOrScript = e.request.mode === 'navigate' || /\.js(\?|$)/i.test(url.pathname);
+  const isDocOrScript = e.request.mode === 'navigate' || /\.(js|webmanifest)(\?|$)/i.test(url.pathname);
   e.respondWith(isDocOrScript ? fetchFirst(e) : cacheFirst(e));
 });
 

@@ -2,10 +2,10 @@
  * 说明：GitHub 单文件上传存在大小限制，原 app.js 拆分为
  *       app.part1.js ~ app.part4.js，由本文件按序注入。
  *       经典 <script> 共享全局作用域，行为与原单文件一致。
- * 版本：2026-08-09b 资产/定期支持编辑
+ * 版本：2026-08-09c 修复新增按钮事件参数 bug
  */
 (function () {
-  var ver = 'v20260809b';
+  var ver = 'v20260809c';
   var parts = ['app.part1.js', 'app.part2.js', 'app.part3.js', 'app.part4.js'];
   for (var i = 0; i < parts.length; i++) {
     document.write('<script src="' + parts[i] + '?' + ver + '"><\/script>');

@@ -287,7 +287,11 @@ function closeModal(){ qs('modalMask').hidden = true; qs('modalBody').innerHTML 
 function openEditModal(id){
   const t = state.transactions.find(x=>x.id===id); if(!t) return;
   const opts = (arr)=> arr.map(c=>`<option ${c===t.category?'selected':''}>${esc(c)}</option>`).join('');
-  const assetOpts = () => '<option value="">无</option>' + state.assets.map(a=>`<option value="${a.id}" ${a.id===t.assetId?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (¥${fmtMoney(a.balance)})</option>`).join('');
+  const assetOpts = () => {
+    const list = state.assets;
+    const first = list.length ? list[0] : null;
+    return '<option value="">无</option>' + list.map(a=>`<option value="${a.id}" ${(a.id===t.assetId) || (!t.assetId && first && a.id===first.id)?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (¥${fmtMoney(a.balance)})</option>`).join('');
+  };
   const body = `
     <div class="field"><label>类型</label>
       <div class="type-toggle" id="et">

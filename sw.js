@@ -2,7 +2,8 @@
  * 作用：把离线版 HTML 与图标缓存到手机本地，
  *       实现「断网 / 服务器休眠」也能打开 App。
  */
-const CACHE = 'xiaoyang-ledger-v1';
+// 2026-08-09b v3：资产/定期支持编辑，换缓存名以清除旧版 app 加载器与分片缓存
+const CACHE = 'xiaoyang-ledger-v3';
 const ASSETS = [
   './',
   './offline.html',        // 单文件自包含版，断网核心

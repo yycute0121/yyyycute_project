@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Q版总资产图标：圆顶银行小楼 -->
+  <defs>
+    <linearGradient id="asset-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#93c5fd"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+  <!-- 屋顶 -->
+  <path d="M 8 18 L 24 6 L 40 18 Z" fill="#3b82f6" stroke="#1e40af" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- 主体 -->
+  <rect x="10" y="18" width="28" height="22" rx="2" fill="url(#asset-grad)" stroke="#1e40af" stroke-width="1.8"/>
+  <!-- 门（拱形） -->
+  <path d="M 20 40 L 20 32 Q 20 28 24 28 Q 28 28 28 32 L 28 40 Z" fill="#fbbf24" stroke="#1e40af" stroke-width="1.5"/>
+  <!-- 门上的小星星 -->
+  <circle cx="24" cy="34" r="1.2" fill="#1e40af"/>
+  <!-- 柱子 -->
+  <rect x="12" y="22" width="2" height="14" fill="#1e40af" opacity="0.3"/>
+  <rect x="34" y="22" width="2" height="14" fill="#1e40af" opacity="0.3"/>
+  <!-- 圆顶装饰（顶部） -->
+  <circle cx="24" cy="9" r="1.5" fill="#fbbf24" stroke="#1e40af" stroke-width="1"/>
+  <!-- 基座 -->
+  <rect x="6" y="40" width="36" height="3" rx="1" fill="#1e40af"/>
+  <!-- 小爱心（可爱点缀） -->
+  <g transform="translate(4 6)">
+    <path d="M 0 2 C 0 0 2 0 2 2 C 2 0 4 0 4 2 C 4 4 2 5 2 5 C 2 5 0 4 0 2 Z" fill="#f472b6" opacity="0.85"/>
+  </g>
+  <g transform="translate(40 4)">
+    <path d="M 0 2 C 0 0 2 0 2 2 C 2 0 4 0 4 2 C 4 4 2 5 2 5 C 2 5 0 4 0 2 Z" fill="#f472b6" opacity="0.85"/>
+  </g>
+</svg>

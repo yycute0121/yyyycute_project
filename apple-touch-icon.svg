@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3498db"/>
+      <stop offset="1" stop-color="#27ae90"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#bg)"/>
+
+  <!-- 笔记本 -->
+  <g transform="rotate(-8 82 96)">
+    <!-- 本子纸身 -->
+    <rect x="42" y="46" width="86" height="104" rx="12" fill="#ffffff"/>
+    <!-- 书脊高光 -->
+    <rect x="42" y="46" width="16" height="104" rx="12" fill="#eaf4fb"/>
+    <!-- 横线条纹 -->
+    <line x1="66" y1="70" x2="116" y2="70" stroke="#d4e8f7" stroke-width="4" stroke-linecap="round"/>
+    <line x1="66" y1="90" x2="116" y2="90" stroke="#d4e8f7" stroke-width="4" stroke-linecap="round"/>
+    <line x1="66" y1="110" x2="116" y2="110" stroke="#d4e8f7" stroke-width="4" stroke-linecap="round"/>
+    <line x1="66" y1="130" x2="100" y2="130" stroke="#d4e8f7" stroke-width="4" stroke-linecap="round"/>
+    <!-- 书签带 -->
+    <rect x="74" y="46" width="12" height="120" fill="#3498db"/>
+  </g>
+
+  <!-- 铅笔：斜跨本子 -->
+  <g transform="rotate(40 128 62)">
+    <!-- 笔身 -->
+    <rect x="120" y="30" width="14" height="56" rx="3" fill="#ffffff"/>
+    <!-- 橡皮头 -->
+    <rect x="120" y="22" width="14" height="9" rx="3" fill="#3498db"/>
+    <!-- 金属箍 -->
+    <rect x="120" y="30" width="14" height="4" fill="#2c3e50"/>
+    <!-- 笔尖 -->
+    <polygon points="120,86 134,86 127,106" fill="#2c3e50"/>
+  </g>
+</svg>

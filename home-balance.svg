@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Q版结余图标：钱包 + 硬币 -->
+  <defs>
+    <linearGradient id="balance-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+  </defs>
+  <!-- 钱包主体 -->
+  <rect x="6" y="16" width="36" height="26" rx="6" fill="url(#balance-grad)" stroke="#d97706" stroke-width="1.8"/>
+  <!-- 钱包顶部翻盖 -->
+  <path d="M 6 18 Q 6 12 12 12 L 36 12 Q 42 12 42 18" fill="#fcd34d" stroke="#d97706" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- 钱包扣 -->
+  <circle cx="36" cy="28" r="3" fill="#fff" stroke="#d97706" stroke-width="1.5"/>
+  <circle cx="36" cy="28" r="1" fill="#d97706"/>
+  <!-- 笑脸眼睛（眯眼） -->
+  <path d="M 16 26 Q 18 24 20 26" stroke="#92400e" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <path d="M 24 26 Q 26 24 28 26" stroke="#92400e" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <!-- 腮红 -->
+  <circle cx="14" cy="32" r="1.8" fill="#fda4af" opacity="0.7"/>
+  <circle cx="30" cy="32" r="1.8" fill="#fda4af" opacity="0.7"/>
+  <!-- 微笑嘴 -->
+  <path d="M 19 32 Q 22 35 25 32" stroke="#92400e" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <!-- 弹出的小硬币 -->
+  <g transform="translate(8 4)">
+    <circle cx="0" cy="0" r="5" fill="#fcd34d" stroke="#d97706" stroke-width="1.5"/>
+    <text x="0" y="2" text-anchor="middle" font-size="6" font-weight="bold" fill="#92400e">¥</text>
+  </g>
+</svg>

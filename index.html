@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://webview.e2b.bj6.sandbox.cloudstudio.club/apple-touch-icon-180.png?x-cs-sandbox-id=ad0f78a4bc5944bbb5e8cfd30e5614d8&x-cs-sandbox-port=8000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="小羊记账平台" />
+  <link rel="icon" href="icon.svg" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>小羊记账平台</title>
+  <link rel="stylesheet" href="styles.css?v=1.2.3" />
+</head>
+<body>
+  <!-- 桌面端左侧导航栏 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img class="logo" src="brand-sheep.svg" alt="">
+      <span class="brand-text">小羊记账平台</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#home" class="nav-item active" data-page="home">
+        <img class="nav-icon" src="nav-home.svg" alt=""><span class="nav-text">首页</span>
+      </a>
+      <a href="#record" class="nav-item" data-page="record">
+        <img class="nav-icon" src="nav-record.svg" alt=""><span class="nav-text">记账</span>
+      </a>
+      <a href="#stats" class="nav-item" data-page="stats">
+        <img class="nav-icon" src="nav-stats.svg" alt=""><span class="nav-text">统计</span>
+      </a>
+      <a href="#budget" class="nav-item" data-page="budget">
+        <img class="nav-icon" src="nav-budget.svg" alt=""><span class="nav-text">预算</span>
+      </a>
+      <a href="#goals" class="nav-item" data-page="goals">
+        <img class="nav-icon" src="nav-goals.svg" alt=""><span class="nav-text">储蓄</span>
+      </a>
+      <a href="#recurring" class="nav-item" data-page="recurring">
+        <img class="nav-icon" src="nav-recurring.svg" alt=""><span class="nav-text">定期</span>
+      </a>
+      <a href="#calendar" class="nav-item" data-page="calendar">
+        <img class="nav-icon" src="nav-calendar.svg" alt=""><span class="nav-text">日历</span>
+      </a>
+      <a href="#assets" class="nav-item" data-page="assets">
+        <img class="nav-icon" src="nav-assets.svg" alt=""><span class="nav-text">资产</span>
+      </a>
+      <a href="#settings" class="nav-item" data-page="settings">
+        <img class="nav-icon" src="nav-settings.svg" alt=""><span class="nav-text">设置</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- 移动端抽屉遮罩 -->
+  <div class="drawer-mask" id="drawerMask" hidden></div>
+
+  <!-- 主布局 -->
+  <div class="app-layout">
+    <!-- 顶部栏 -->
+    <header class="app-header">
+      <button class="menu-btn" id="menuBtn" title="菜单">☰</button>
+      <h1 class="page-title" id="pageTitle">首页</h1>
+      <div class="header-actions" id="headerActions">
+        <button class="icon-btn" id="refreshBtn" title="刷新获取最新版本">⟳</button>
+      </div>
+    </header>
+
+    <!-- 新版本提示条 -->
+    <div class="update-banner" id="updateBanner" hidden>
+      <span class="ub-text" id="ubText"></span>
+      <button class="btn solid small" id="ubRefresh">刷新</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="app-main" id="appMain">
+
+      <!-- ========== 1. 首页 ========== -->
+      <section class="page" id="page-home" data-title="首页">
+        <!-- 时间筛选 -->
+        <div class="filter-bar compact">
+          <div class="seg" id="homeFilterSeg">
+            <button data-filter="day" class="seg-btn">今日</button>
+            <button data-filter="week" class="seg-btn active">本周</button>
+            <button data-filter="lastWeek" class="seg-btn">上周</button>
+            <button data-filter="month" class="seg-btn">本月</button>
+          </div>
+        </div>
+        <!-- 核心数据卡片 -->
+        <div class="cards-row">
+          <div class="stat-card income">
+            <div class="stat-icon"><img src="home-income.svg" alt=""></div>
+            <div class="stat-meta"><span class="stat-label">总收入</span><span class="stat-value" id="homeIncome">¥0.00</span></div>
+          </div>
+          <div class="stat-card expense">
+            <div class="stat-icon"><img src="home-expense.svg" alt=""></div>
+            <div class="stat-meta"><span class="stat-label">总支出</span><span class="stat-value" id="homeExpense">¥0.00</span></div>
+          </div>
+          <div class="stat-card balance">
+            <div class="stat-icon"><img src="home-balance.svg" alt=""></div>
+            <div class="stat-meta"><span class="stat-label">结余</span><span class="stat-value" id="homeBalance">¥0.00</span></div>
+          </div>
+          <div class="stat-card asset">
+            <div class="stat-icon"><img src="home-asset.svg" alt=""></div>
+            <div class="stat-meta"><span class="stat-label">总资产</span><span class="stat-value" id="homeAsset">¥0.00</span></div>
+          </div>
+        </div>
+        <!-- 快捷操作 -->
+        <div class="quick-actions">
+          <button class="btn solid big" id="homeQuickAdd">＋ 记一笔</button>
+        </div>
+        <!-- 最近交易 -->
+        <div class="panel">
+          <div class="panel-head"><h2><img src="home-receipt.svg" alt="">最近交易</h2><a href="#record" class="link">查看全部 ›</a></div>
+          <div class="txn-list compact" id="homeRecent"></div>
+        </div>
+        <!-- 预算预警摘要 -->
+        <div class="panel" id="homeBudgetPanel">
+          <div class="panel-head"><h2><img src="home-target.svg" alt="">预算概览</h2><a href="#budget" class="link">查看详情 ›</a></div>
+          <div id="homeBudgetSummary"></div>
+        </div>
+        <!-- 迷你趋势图 -->
+        <div class="panel">
+          <div class="panel-head"><h2><img src="home-trend.svg" alt="">本月收支趋势</h2></div>
+          <div class="chart-wrap mini"><canvas id="homeTrendChart"></canvas></div>
+        </div>
+      </section>
+
+      <!-- ========== 2. 记账页 ========== -->
+      <section class="page" id="page-record" data-title="记账" hidden>
+        <div class="panel">
+          <div class="panel-head"><h2>📝 新增账单</h2></div>
+          <div class="form-inline">
+            <div class="field"><label>类型</label>
+              <div class="type-toggle" id="recordType">
+                <button type="button" class="exp active" data-t="expense">支出</button>
+                <button type="button" class="inc" data-t="income">收入</button>
+              </div>
+            </div>
+            <div class="field"><label>日期</label><input type="date" id="rDate" /></div>
+            <div class="field"><label>金额</label><input type="number" id="rAmt" step="0.01" min="0" placeholder="0.00" /></div>
+            <div class="field"><label>分类</label><select id="rCat"></select></div>
+            <div class="field"><label>关联资产</label><select id="rAsset"></select></div>
+            <div class="field"><label>备注</label><input type="text" id="rNote" placeholder="可选" /></div>
+            <div class="field" style="align-self:flex-end"><button class="btn solid" id="rSave">添加账单</button></div>
+          </div>
+          <div class="aa-row" id="aaField" hidden>
+            <label class="aa-toggle"><input type="checkbox" id="rAa" /> <span>AA 分摊</span></label>
+            <div class="aa-inputs" id="aaInputs" hidden>
+              <span>共 <input type="number" id="rAaTotal" min="2" value="2" /> 人，我付 <input type="number" id="rAaMine" min="1" value="1" /> 份</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head stack">
+            <h2>账单明细</h2>
+            <div class="list-tools">
+              <div class="seg small" id="recordFilterSeg">
+                <button data-filter="day" class="seg-btn">今日</button>
+                <button data-filter="week" class="seg-btn active">本周</button>
+                <button data-filter="lastWeek" class="seg-btn">上周</button>
+                <button data-filter="month" class="seg-btn">本月</button>
+              </div>
+              <div class="range-picker" id="recordRangePicker">
+                <input type="date" id="rRangeStart" />
+                <span>至</span>
+                <input type="date" id="rRangeEnd" />
+              </div>
+              <input type="search" id="rSearch" class="search-input" placeholder="搜索备注 / 分类…" />
+            </div>
+          </div>
+          <!-- 汇总卡片 -->
+          <div class="cards-row mini" id="recordSummary">
+            <div class="stat-card income"><div class="stat-meta"><span class="stat-label">收入</span><span class="stat-value" id="rSumInc">¥0.00</span></div></div>
+            <div class="stat-card expense"><div class="stat-meta"><span class="stat-label">支出</span><span class="stat-value" id="rSumExp">¥0.00</span></div></div>
+            <div class="stat-card balance"><div class="stat-meta"><span class="stat-label">结余</span><span class="stat-value" id="rSumBal">¥0.00</span></div></div>
+          </div>
+          <div class="txn-list" id="recordList"></div>
+          <div class="pagination" id="recordPagination">
+            <button class="btn ghost small" id="rPagePrev">‹</button>
+            <span id="rPageInfo">1 / 1</span>
+            <button class="btn ghost small" id="rPageNext">›</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 3. 统计页 ========== -->
+      <section class="page" id="page-stats" data-title="统计" hidden>
+        <div class="filter-bar compact">
+          <div class="seg" id="statsFilterSeg">
+            <button data-filter="day" class="seg-btn">今日</button>
+            <button data-filter="week" class="seg-btn active">本周</button>
+            <button data-filter="lastWeek" class="seg-btn">上周</button>
+            <button data-filter="month" class="seg-btn">本月</button>
+            <button data-filter="lastMonth" class="seg-btn">上月</button>
+            <button data-filter="year" class="seg-btn">本年</button>
+            <button data-filter="all" class="seg-btn">全部</button>
+          </div>
+          <div class="range-picker" id="statsRangePicker">
+            <input type="date" id="sRangeStart" />
+            <span>至</span>
+            <input type="date" id="sRangeEnd" />
+          </div>
+          <div class="view-switch" id="viewSwitch">
+            <span class="vs-label">视图</span>
+            <div class="seg small">
+              <button data-view="day" class="seg-btn active">按日</button>
+              <button data-view="month" class="seg-btn">按月</button>
+              <button data-view="year" class="seg-btn">按年</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>可视化分析</h2>
+            <div class="seg" id="statsChartTab">
+              <button data-chart="expense" class="seg-btn active">支出饼图</button>
+              <button data-chart="income" class="seg-btn">收入饼图</button>
+              <button data-chart="trend" class="seg-btn">收支趋势</button>
+            </div>
+          </div>
+          <div class="chart-wrap" id="statsChartWrap">
+            <canvas id="statsPieChart"></canvas>
+            <canvas id="statsLineChart" hidden></canvas>
+            <div class="chart-empty" id="statsChartEmpty">暂无数据</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>分类排行</h2></div>
+          <div id="statsRank"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>🧾 交易明细</h2></div>
+          <div class="stats-table-wrap" id="statsTxnWrap">
+            <table class="stats-table" id="statsTxnTable">
+              <thead><tr><th>日期</th><th>总计</th></tr></thead>
+              <tbody><tr><td colspan="2" class="empty">暂无数据</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 4. 预算页 ========== -->
+      <section class="page" id="page-budget" data-title="预算" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>预算总览</h2>
+            <button class="btn ghost" id="budgetSettingBtn">⚙️ 设置预算</button>
+          </div>
+          <div class="budget-cmp" id="budgetCmp"></div>
+          <div id="budgetTotalBar"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>分类预算</h2></div>
+          <div class="budget-grid" id="budgetGrid"></div>
+        </div>
+      </section>
+
+      <!-- ========== 5. 储蓄页 ========== -->
+      <section class="page" id="page-goals" data-title="储蓄" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>🌟 储蓄目标</h2>
+            <button class="btn ghost" id="goalAddBtn">＋ 新建目标</button>
+          </div>
+          <div class="goal-list" id="goalList"></div>
+        </div>
+      </section>
+
+      <!-- ========== 6. 定期页 ========== -->
+      <section class="page" id="page-recurring" data-title="定期" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>🔁 定期收支</h2>
+            <button class="btn ghost" id="recAddBtn">＋ 新增项目</button>
+          </div>
+          <div class="recurring-list" id="recurringList"></div>
+          <button class="btn solid full" id="recGenBtn">⚡ 一键生成本月账单</button>
+        </div>
+      </section>
+
+      <!-- ========== 7. 日历页 ========== -->
+      <section class="page" id="page-calendar" data-title="日历" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>📅 日历视图</h2>
+            <div class="cal-nav">
+              <button class="btn ghost" id="calPrev">‹</button>
+              <span id="calTitle">—</span>
+              <button class="btn ghost" id="calNext">›</button>
+            </div>
+          </div>
+          <div class="calendar" id="calendar"></div>
+        </div>
+      </section>
+
+      <!-- ========== 8. 资产页 ========== -->
+      <section class="page" id="page-assets" data-title="资产" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>💰 我的资产</h2>
+            <button class="btn ghost" id="assetAddBtn">＋ 新增资产</button>
+          </div>
+          <div class="cards-row" id="assetCards"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>资产明细</h2></div>
+          <div id="assetList"></div>
+        </div>
+      </section>
+
+      <!-- ========== 9. 设置页 ========== -->
+      <section class="page" id="page-settings" data-title="设置" hidden>
+        <div class="panel">
+          <div class="panel-head"><h2><img src="panel-categories.svg" class="panel-title-icon" alt="">分类管理</h2></div>
+          <div class="cat-manage" id="catManage"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2><img src="panel-categories.svg" class="panel-title-icon" alt="">数据管理</h2></div>
+          <div class="settings-actions">
+            <button class="btn solid" id="exportBtn">⬇️ 导出账单为 Excel</button>
+            <button class="btn ghost" id="backupExportBtn"><img src="panel-backup.svg" class="btn-icon" alt="">整库备份（下载JSON到本地）</button>
+            <button class="btn ghost" id="backupImportBtn"><img src="panel-restore.svg" class="btn-icon" alt="">整库恢复（导入JSON）</button>
+            <input type="file" id="backupFile" accept="application/json,.json" hidden />
+            <button class="btn danger" id="clearBtn"><img src="panel-clear.svg" class="btn-icon" alt="">清除所有数据</button>
+          </div>
+          <div class="backup-info" id="backupInfo"></div>
+          <div class="settings-version">当前版本：<span id="appVersion">—</span></div>
+          <p style="font-size:12px;color:var(--ink-soft);margin-top:8px">
+            整库备份会保存全部账单/预算/目标/资产等数据。沙箱休眠或换设备导致数据"消失"时，导入此文件即可完整恢复。
+          </p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 移动端底部Tab栏 -->
+    <nav class="bottom-tab" id="bottomTab">
+      <a href="#home" class="tab-item active" data-page="home">
+        <img class="tab-icon" src="nav-home.svg" alt=""><span class="tab-text">首页</span>
+      </a>
+      <a href="#record" class="tab-item" data-page="record">
+        <img class="tab-icon" src="nav-record.svg" alt=""><span class="tab-text">记账</span>
+      </a>
+      <a href="#stats" class="tab-item" data-page="stats">
+        <img class="tab-icon" src="nav-stats.svg" alt=""><span class="tab-text">统计</span>
+      </a>
+      <a href="#budget" class="tab-item" data-page="budget">
+        <img class="tab-icon" src="nav-budget.svg" alt=""><span class="tab-text">预算</span>
+      </a>
+      <a href="#more" class="tab-item" data-page="more" id="tabMore">
+        <span class="tab-icon-dots">⋮</span><span class="tab-text">更多</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- 通用弹窗 -->
+  <div class="modal-mask" id="modalMask" hidden>
+    <div class="modal" id="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">标题</h3>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" async></script>
+  <script src="app.js?v=1.2.3"></script>
+  <script>
+    // 注册 Service Worker：把离线版缓存到本地，断网/服务器休眠也能打开
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js').catch(function () {});
+      });
+    }
+  </script>
+</body>
+</html>

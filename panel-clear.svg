@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Q版清除数据图标：小垃圾桶 -->
+  <defs>
+    <linearGradient id="trash-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fca5a5"/>
+      <stop offset="100%" stop-color="#f87171"/>
+    </linearGradient>
+  </defs>
+  <!-- 桶身 -->
+  <rect x="12" y="16" width="24" height="26" rx="4" fill="url(#trash-grad)" stroke="#dc2626" stroke-width="1.8"/>
+  <!-- 桶盖 -->
+  <rect x="8" y="10" width="32" height="6" rx="3" fill="#fecaca" stroke="#dc2626" stroke-width="1.8"/>
+  <!-- 提手 -->
+  <path d="M 20 10 L 20 6 Q 20 4 24 4 Q 28 4 28 6 L 28 10" fill="none" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- 桶内竖线（模拟镂空） -->
+  <line x1="18" y1="22" x2="18" y2="34" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <line x1="24" y1="22" x2="24" y2="34" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <line x1="30" y1="22" x2="30" y2="34" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <!-- 小哭脸眼睛 -->
+  <path d="M 17 26 Q 18 27 19 26" stroke="#991b1b" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+  <path d="M 29 26 Q 30 27 31 26" stroke="#991b1b" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+  <!-- 小泪滴 -->
+  <path d="M 15 28 Q 15 30 16 30 Q 17 30 17 28" fill="#3b82f6" opacity="0.6"/>
+  <!-- 倒嘴 -->
+  <path d="M 21 30 Q 24 28 27 30" stroke="#991b1b" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+</svg>

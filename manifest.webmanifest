@@ -1,0 +1,18 @@
+{
+  "name": "小羊记账平台",
+  "short_name": "小羊记账",
+  "description": "个人日常记账与资产管理",
+  "start_url": "./offline.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f4f8",
+  "theme_color": "#3498db",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -77,6 +77,9 @@ function renderBudgetPage(){
   const ms = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const monthExp = state.transactions.filter(t=> t.type==='expense' && t.date.startsWith(ms));
   const spentTotal = sum(monthExp.map(t=>t.amount));
+  // 预聚合各分类支出，避免循环里反复 filter
+  const spentByCat = {};
+  monthExp.forEach(t=>{ spentByCat[t.category] = (spentByCat[t.category]||0) + t.amount; });
   const budgets = state.budget.categories || {};
   const totalBudget = Number(state.budget.total) || 0;
 
@@ -117,7 +120,7 @@ function renderBudgetPage(){
   }
   grid.innerHTML = cats.map(c=>{
     const budget = budgets[c];
-    const spent = sum(monthExp.filter(t=>t.category===c).map(t=>t.amount));
+    const spent = spentByCat[c] || 0;
     const pct = budget>0 ? (spent/budget*100) : 0;
     const remain = budget - spent;
     let lv = 'lv-ok', tip = '预算充足';
@@ -290,7 +293,7 @@ function openEditModal(id){
   const assetOpts = () => {
     const list = state.assets;
     const first = list.length ? list[0] : null;
-    return '<option value="">无</option>' + list.map(a=>`<option value="${a.id}" ${(a.id===t.assetId) || (!t.assetId && first && a.id===first.id)?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (¥${fmtMoney(a.balance)})</option>`).join('');
+    return '<option value="">无</option>' + list.map(a=>`<option value="${a.id}" ${(a.id===t.assetId) || (!t.assetId && first && a.id===first.id)?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (${fmtMoney(a.balance)})</option>`).join('');
   };
   const body = `
     <div class="field"><label>类型</label>

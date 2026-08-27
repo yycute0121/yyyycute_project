@@ -1,5 +1,6 @@
 'use strict';
-function init(){
+async function init(){
+ await loadState(); // 先从 IndexedDB（或迁移 localStorage）加载数据，再渲染
   // 1.2.2 筛选选项：首页/记账页保留 day/week/lastWeek/month，统计页额外支持 lastMonth/year/all
   const validFilterTypes = ['day','week','lastWeek','month','lastMonth','year','all','custom'];
   if (!validFilterTypes.includes(state.filter.type)) {
@@ -32,7 +33,7 @@ function init(){
   if (chartScript) chartScript.addEventListener('load', () => renderCurrentPage());
   // 顶栏刷新按钮 & 新版本提示
   qs('refreshBtn').addEventListener('click', forceRefresh);
-  qs('ubRefresh').addEventListener('click', forceRefresh);
+  qs('ubRefresh').onclick = forceRefresh; // 默认行为；检测到新版本时会被 checkUpdateRemote 覆盖
   checkUpdate();
   checkUpdateRemote();
   // 启动时自动检查今天是否有到期的定期收支
@@ -43,7 +44,7 @@ function init(){
   switchPage(validPages.includes(hash) ? hash : (state.page || 'home'));
 }
 
-/* 强制刷新获取最新代码（数据在 localStorage，不会丢失） */
+/* 强制刷新获取最新代码（数据在 IndexedDB，不会丢失） */
 function forceRefresh(){
   state.seenVersion = APP_VERSION; save();
   location.reload(true);

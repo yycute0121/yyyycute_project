@@ -1,6 +1,6 @@
 /* =========================================================
    个人记账工作台 v2 — 页面路由版
-   纯前端 / 本地持久化 (localStorage)
+   纯前端 / 本地持久化 (IndexedDB，自动迁移旧 localStorage 数据)
    ========================================================= */
 'use strict';
 
@@ -15,51 +15,107 @@ const DEFAULTS = {
   expenseCategories: ['餐饮','住房','交通','购物','医疗','娱乐','旅行','人情','学习','服装','其他'],
 };
 
-/* ---------- 状态 ---------- */
-let state = loadState();
+/* ---------- IndexedDB 存储层（异步，不阻塞 UI） ---------- */
+const IDB_NAME = 'pw_account_book';
+const IDB_STORE = 'kv';
+let idbReady = false;
 
-function loadState(){
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) {
-      const s = JSON.parse(raw);
-      s.incomeCategories = s.incomeCategories || DEFAULTS.incomeCategories.slice();
-      s.expenseCategories = s.expenseCategories || DEFAULTS.expenseCategories.slice();
-      s.transactions = s.transactions || [];
-      s.budget = s.budget || { total: 0, categories: {} };
-      s.goals = s.goals || [];
-      s.recurring = s.recurring || [];
-      s.assets = s.assets || [];
-      s.filter = s.filter || { type:'week', single: todayStr(), start:'', end:'' };
-      s.view = s.view || 'day';
-      s.chartTab = s.chartTab || 'expense';
-      s.search = s.search || '';
-      s.calMonth = s.calMonth || todayStr().slice(0,7);
-      s.page = s.page || 'home';
-      s.recordPage = s.recordPage || 1;
-      s.defaultFilterMigrated = s.defaultFilterMigrated || false;
-      s.lastBackup = s.lastBackup || '';
-      s.lastRestore = s.lastRestore || '';
-      s.seenVersion = s.seenVersion || '';
-      return s;
-    }
-  } catch(e){ console.warn('读取本地数据失败', e); }
-  return {
-    transactions: [], incomeCategories: DEFAULTS.incomeCategories.slice(),
-    expenseCategories: DEFAULTS.expenseCategories.slice(),
-    budget: { total: 0, categories: {} },
-    goals: [], recurring: [], assets: [],
-    filter: { type:'week', single: todayStr(), start:'', end:'' },
-    view: 'day', chartTab: 'expense', search: '', calMonth: todayStr().slice(0,7),
-    page: 'home', recordPage: 1, defaultFilterMigrated: true, lastBackup: '', lastRestore: '', seenVersion: '',
-  };
+function idbOpen(){
+ return new Promise((resolve, reject) => {
+ const req = indexedDB.open(IDB_NAME, 1);
+ req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+ req.onsuccess = () => resolve(req.result);
+ req.onerror = () => reject(req.error);
+ });
+}
+function idbGet(key){
+ return idbOpen().then(db => new Promise((resolve, reject) => {
+ const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
+ req.onsuccess = () => resolve(req.result);
+ req.onerror = () => reject(req.error);
+ }));
+}
+function idbSet(key, val){
+ return idbOpen().then(db => new Promise((resolve, reject) => {
+ const req = db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).put(val, key);
+ req.onsuccess = () => resolve();
+ req.onerror = () => reject(req.error);
+ }));
+}
+function idbClear(){
+ return idbOpen().then(db => new Promise((resolve, reject) => {
+ const req = db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).clear();
+ req.onsuccess = () => resolve();
+ req.onerror = () => reject(req.error);
+ }));
 }
 
-function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+/* ---------- 状态 ---------- */
+let state = defaultState();
+
+function defaultState(){
+ return {
+ transactions: [], incomeCategories: DEFAULTS.incomeCategories.slice(),
+ expenseCategories: DEFAULTS.expenseCategories.slice(),
+ budget: { total: 0, categories: {} },
+ goals: [], recurring: [], assets: [],
+ filter: { type:'week', single: todayStr(), start:'', end:'' },
+ view: 'day', chartTab: 'expense', search: '', calMonth: todayStr().slice(0,7),
+ page: 'home', recordPage: 1, defaultFilterMigrated: true, lastBackup: '', lastRestore: '', seenVersion: '',
+ };
+}
+
+function normalizeState(s){
+ const base = defaultState();
+ s = Object.assign(base, s || {});
+ s.incomeCategories = Array.isArray(s.incomeCategories) && s.incomeCategories.length ? s.incomeCategories : DEFAULTS.incomeCategories.slice();
+ s.expenseCategories = Array.isArray(s.expenseCategories) && s.expenseCategories.length ? s.expenseCategories : DEFAULTS.expenseCategories.slice();
+ s.transactions = Array.isArray(s.transactions) ? s.transactions : [];
+ s.budget = s.budget && typeof s.budget === 'object' ? s.budget : { total: 0, categories: {} };
+ s.goals = Array.isArray(s.goals) ? s.goals : [];
+ s.recurring = Array.isArray(s.recurring) ? s.recurring : [];
+ s.assets = Array.isArray(s.assets) ? s.assets : [];
+ s.filter = s.filter && typeof s.filter === 'object' ? s.filter : { type:'week', single: todayStr(), start:'', end:'' };
+ return s;
+}
+
+/* 启动时异步加载：先读 IndexedDB，没有则迁移 localStorage 旧数据 */
+async function loadState(){
+ try {
+ const saved = await idbGet('state');
+ if (saved) {
+ state = normalizeState(saved);
+ } else {
+ const raw = localStorage.getItem(STORE_KEY);
+ if (raw) {
+ state = normalizeState(JSON.parse(raw));
+ await idbSet('state', state);
+ localStorage.removeItem(STORE_KEY);
+ }
+ }
+ } catch(e){ console.warn('读取本地数据失败', e); }
+ idbReady = true;
+ // 申请持久化存储，降低被浏览器自动清理的概率
+ if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+}
+
+/* 防抖保存：300ms 内多次操作只落盘一次；页面隐藏/关闭时立即落盘 */
+let saveTimer = null;
+function save(){
+ clearTimeout(saveTimer);
+ saveTimer = setTimeout(saveNow, 300);
+}
+function saveNow(){
+ clearTimeout(saveTimer);
+ if (!idbReady) return;
+ idbSet('state', state).catch(e => console.warn('保存失败', e));
+}
+window.addEventListener('beforeunload', saveNow);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveNow(); });
 
 /* 整库导入：用备份对象覆盖当前数据，补齐缺省字段 */
 function importData(obj){
-  const base = loadState(); // 取默认骨架
+  const base = defaultState(); // 取默认骨架
   state = Object.assign(base, {
     transactions: Array.isArray(obj.transactions) ? obj.transactions : base.transactions,
     incomeCategories: Array.isArray(obj.incomeCategories) ? obj.incomeCategories : base.incomeCategories,
@@ -98,7 +154,7 @@ function updateAssetSelect(type){
   if (!sel) return;
   const cashFirst = [...state.assets].sort((a,b)=> (a.type==='cash'?-1:1) - (b.type==='cash'?-1:1));
   const first = cashFirst.length ? cashFirst[0] : null;
-  sel.innerHTML = '<option value="">无</option>' + cashFirst.map(a=>`<option value="${a.id}" ${first && a.id===first.id?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (¥${fmtMoney(a.balance)})</option>`).join('');
+  sel.innerHTML = '<option value="">无</option>' + cashFirst.map(a=>`<option value="${a.id}" ${first && a.id===first.id?'selected':''}>${a.type==='cash'?'💵':'💳'} ${esc(a.name)} (${fmtMoney(a.balance)})</option>`).join('');
 }
 function fmtDateTime(iso){
   if(!iso) return '';
@@ -207,6 +263,8 @@ function renderHome(){
   const ms = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const monthExp = state.transactions.filter(t=> t.type==='expense' && t.date.startsWith(ms));
   const spentTotal = sum(monthExp.map(t=>t.amount));
+  const spentByCat = {};
+  monthExp.forEach(t=>{ spentByCat[t.category] = (spentByCat[t.category]||0) + t.amount; });
   const totalBudget = Number(state.budget.total) || 0;
   const budgets = state.budget.categories || {};
   let budgetHtml = '';
@@ -226,12 +284,12 @@ function renderHome(){
       </div>`;
     // 超支分类预警
     const warnCats = Object.keys(budgets).filter(c=>{
-      const b = budgets[c]; const s = sum(monthExp.filter(t=>t.category===c).map(t=>t.amount));
+      const b = budgets[c]; const s = spentByCat[c] || 0;
       return s > b || s/b >= 0.8;
     });
     if (warnCats.length){
       budgetHtml += `<div style="font-size:12px;color:var(--warn-red);font-weight:600">⚠ ${warnCats.map(c=>{
-        const b=budgets[c]; const s=sum(monthExp.filter(t=>t.category===c).map(t=>t.amount));
+        const b=budgets[c]; const s=spentByCat[c] || 0;
         return s>b ? `${c}已超支` : `${c}即将超预算`;
       }).join(' · ')}</div>`;
     }
@@ -255,9 +313,9 @@ function renderHome(){
     ]},
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'¥'+v, font:{size:10} }, grid:{color:'#f0f0f0'} }, x:{ ticks:{font:{size:10}}, grid:{display:false} } } }
   };
-  if (homeChartInst) homeChartInst.destroy();
-  homeChartInst = new Chart(qs('homeTrendChart').getContext('2d'), cfg);
-}
+  if (homeChartInst) { homeChartInst.data = cfg.data; homeChartInst.options = cfg.options; homeChartInst.update(); }
+  else homeChartInst = new Chart(qs('homeTrendChart').getContext('2d'), cfg);
+  }
 
 /* =========================================================
    2. 记账页渲染
@@ -318,6 +376,13 @@ function renderStatsPage(){
   const tab = state.chartTab;
   const pieCanvas = qs('statsPieChart'), lineCanvas = qs('statsLineChart');
 
+
+ // 排行/明细/饼图共用的数据，只算一次
+ const isInc = tab === 'income';
+ const txns = getRangeTxns().filter(t=> t.type === (isInc?'income':'expense'));
+ const grouped = {};
+ txns.forEach(t=>{ grouped[t.category] = (grouped[t.category]||0) + t.amount; });
+
   if (tab === 'trend'){
     pieCanvas.hidden = true; lineCanvas.hidden = false;
     const d = trendData();
@@ -333,14 +398,10 @@ function renderStatsPage(){
       ]},
       options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'top'} }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'¥'+v } } } }
     };
-    if (lineInst) lineInst.destroy();
-    lineInst = new Chart(lineCanvas.getContext('2d'), cfg);
+    if (lineInst) { lineInst.data = cfg.data; lineInst.options = cfg.options; lineInst.update(); }
+    else lineInst = new Chart(lineCanvas.getContext('2d'), cfg);
   } else {
     lineCanvas.hidden = true; pieCanvas.hidden = false;
-    const isInc = tab === 'income';
-    const txns = getRangeTxns().filter(t=> t.type === (isInc?'income':'expense'));
-    const grouped = {};
-    txns.forEach(t=>{ grouped[t.category] = (grouped[t.category]||0) + t.amount; });
     const labels = Object.keys(grouped);
     const data = labels.map(l=>grouped[l]);
     const has = labels.length > 0;
@@ -353,15 +414,11 @@ function renderStatsPage(){
       options:{ responsive:true, maintainAspectRatio:false, cutout:'58%',
         plugins:{ legend:{position:'right'}, tooltip:{ callbacks:{ label:c=>` ${c.label}: ${fmtMoney(c.parsed)}` } } } }
     };
-    if (pieInst) pieInst.destroy();
-    pieInst = new Chart(pieCanvas.getContext('2d'), cfg);
+    if (pieInst) { pieInst.data = cfg.data; pieInst.options = cfg.options; pieInst.update(); }
+    else pieInst = new Chart(pieCanvas.getContext('2d'), cfg);
   }
 
-  // 分类排行
-  const isInc = state.chartTab === 'income';
-  const txns = getRangeTxns().filter(t=> t.type === (isInc?'income':'expense'));
-  const grouped = {};
-  txns.forEach(t=>{ grouped[t.category] = (grouped[t.category]||0) + t.amount; });
+  // 分类排行（复用顶部已算好的 grouped）
   const total = sum(Object.values(grouped));
   const sorted = Object.entries(grouped).sort((a,b)=>b[1]-a[1]);
   qs('statsRank').innerHTML = sorted.length ? sorted.map(([cat, amt], i)=>`

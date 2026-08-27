@@ -273,7 +273,11 @@ function bindEvents(){
   qs('rPagePrev').addEventListener('click', ()=>{ if(state.recordPage>1){ state.recordPage--; save(); renderRecord(); } });
   qs('rPageNext').addEventListener('click', ()=>{ state.recordPage++; save(); renderRecord(); });
   // 搜索
-  qs('rSearch').addEventListener('input', e=>{ state.search=e.target.value; save(); renderRecord(); });
+  let searchTimer;
+ qs('rSearch').addEventListener('input', e=>{
+ clearTimeout(searchTimer);
+ searchTimer = setTimeout(()=>{ state.search=e.target.value; save(); renderRecord(); }, 250);
+ });
   // 编辑/删除
   qs('recordList').addEventListener('click', e=>{
     const ed=e.target.closest('[data-edit]'); const dl=e.target.closest('[data-del]');
@@ -366,8 +370,8 @@ function bindEvents(){
   qs('exportBtn').addEventListener('click', exportExcel);
   qs('clearBtn').addEventListener('click', ()=>{
     if(confirm('⚠ 确定清除所有数据？此操作不可恢复！')){
-      localStorage.removeItem(STORE_KEY);
-      location.reload();
+    localStorage.removeItem(STORE_KEY);
+    idbClear().finally(()=> location.reload());
     }
   });
   qs('backupExportBtn').addEventListener('click', ()=>{

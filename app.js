@@ -5,7 +5,7 @@
  * 版本：2026-08-09f SW 更新接管后自动刷新，PWA/桌面图标也能拿到最新代码
  */
 (function () {
-  var ver = 'v20260827a';
+  var ver = 'v20260827b';
   var parts = ['app.part1.js', 'app.part2.js', 'app.part3.js', 'app.part4.js'];
   // defer 脚本按顺序执行且并行下载，替代 document.write 的串行阻塞加载
   for (var i = 0; i < parts.length; i++) {

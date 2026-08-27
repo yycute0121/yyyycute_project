@@ -4,10 +4,11 @@
  */
 // 2026-08-09h v9：manifest 也走网络优先（PWA start_url 改为 index.html，
 //                 避免旧缓存把 manifest.webmanifest 卡住导致启动页无法更新）
-const CACHE = 'xiaoyang-ledger-v10';
+const CACHE = 'xiaoyang-ledger-v11';
 const ASSETS = [
   './',
   './offline.html',        // 单文件自包含版，断网兜底
+ './chart.umd.min.js', // 图表库本地化，避免 CDN 波动拖慢首屏
   './apple-touch-icon-180.png',
   './icon-192.png',
   './icon.png',

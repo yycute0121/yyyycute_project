@@ -5,7 +5,7 @@
 'use strict';
 
 const STORE_KEY = 'pw_account_book_v1';
-const APP_VERSION = '1.3.2';
+const APP_VERSION = '1.4.0';
 const PALETTE = ['#3498db','#27ae90','#e67e22','#9b59b6','#f1c40f','#e74c3c',
                  '#1abc9c','#34495e','#16a085','#d35400','#8e44ad','#2ecc71',
                  '#f39c12','#c0392b','#2980b9','#7f8c8d'];
@@ -64,6 +64,7 @@ function defaultState(){
  filter: { type:'week', single: todayStr(), start:'', end:'' },
  view: 'day', chartTab: 'expense', search: '', calMonth: todayStr().slice(0,7),
  page: 'home', recordPage: 1, defaultFilterMigrated: true, lastBackup: '', lastRestore: '', seenVersion: '',
+ assetHidden: false,
  };
 }
 
@@ -242,6 +243,20 @@ function renderCurrentPage(opts={}){
    1. 首页渲染
    ========================================================= */
 let homeChartInst = null;
+
+/* 总资产隐私小眼睛 */
+function renderHomeAsset(){
+ const el = qs('homeAsset'); if (!el) return;
+ const hidden = !!state.assetHidden;
+ el.textContent = hidden ? '¥ ****' : fmtMoney(sum(state.assets.map(a=>a.balance)));
+ el.classList.toggle('masked', hidden);
+}
+function updateAssetEye(){
+ const open = qs('assetEyeOpen'), off = qs('assetEyeOff'); if (!open || !off) return;
+ open.hidden = !!state.assetHidden;
+ off.hidden = !state.assetHidden;
+}
+
 function renderHome(){
   const txns = getRangeTxns();
   const inc = sum(txns.filter(t=>t.type==='income').map(t=>t.amount));
@@ -249,7 +264,8 @@ function renderHome(){
   qs('homeIncome').textContent = fmtMoney(inc);
   qs('homeExpense').textContent = fmtMoney(exp);
   qs('homeBalance').textContent = fmtMoney(inc - exp);
-  qs('homeAsset').textContent = fmtMoney(sum(state.assets.map(a=>a.balance)));
+  renderHomeAsset();
+  updateAssetEye();
 
   // 最近3笔
   const recent = state.transactions.slice().sort((a,b)=> a.date<b.date?1 : a.date>b.date?-1 : b.id.localeCompare(a.id)).slice(0,3);

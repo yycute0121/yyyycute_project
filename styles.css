@@ -262,6 +262,17 @@ body {
 .stat-label { font-size: 13px; color: var(--ink-soft); font-weight: 600; letter-spacing: .5px; }
 .stat-value { font-size: 22px; font-weight: 800; letter-spacing: .3px; }
 
+/* 总资产隐私小眼睛 */
+.stat-label { display: inline-flex; align-items: center; gap: 5px; }
+.eye-btn {
+  border: 0; background: transparent; padding: 2px; line-height: 0;
+  border-radius: 6px; color: var(--ink-soft); cursor: pointer;
+  display: inline-flex; transition: color .15s;
+}
+.eye-btn:hover { color: var(--blue); }
+.eye-btn svg { width: 16px; height: 16px; display: block; }
+.stat-value.masked { letter-spacing: 2px; color: var(--ink-soft); font-weight: 700; }
+
 /* 记账页汇总卡片（更紧凑） */
 .cards-row.mini { grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
 .cards-row.mini .stat-card { padding: 8px 6px; gap: 2px; }

@@ -188,6 +188,7 @@ function bindEvents(){
     save(); renderHome();
   });
   qs('homeQuickAdd').addEventListener('click', ()=> switchPage('record'));
+ qs('assetEyeBtn').addEventListener('click', ()=>{ state.assetHidden = !state.assetHidden; save(); renderHomeAsset(); updateAssetEye(); });
 
   // ===== 记账页事件 =====
   // 类型切换

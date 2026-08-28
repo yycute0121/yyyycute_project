@@ -47,7 +47,15 @@ async function init(){
 /* 强制刷新获取最新代码（数据在 IndexedDB，不会丢失） */
 function forceRefresh(){
   state.seenVersion = APP_VERSION; save();
-  location.reload(true);
+  // 先清空 SW 缓存再刷新，确保下次加载拿到的是最新代码而非本地旧缓存
+  if ('caches' in window) {
+    caches.keys()
+      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .catch(() => {})
+      .finally(() => location.reload());
+  } else {
+    location.reload();
+  }
 }
 
 /* 老用户检测版本更新并提示 */

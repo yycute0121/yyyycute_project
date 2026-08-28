@@ -5,7 +5,7 @@
 'use strict';
 
 const STORE_KEY = 'pw_account_book_v1';
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.3.1';
 const PALETTE = ['#3498db','#27ae90','#e67e22','#9b59b6','#f1c40f','#e74c3c',
                  '#1abc9c','#34495e','#16a085','#d35400','#8e44ad','#2ecc71',
                  '#f39c12','#c0392b','#2980b9','#7f8c8d'];

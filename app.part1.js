@@ -5,7 +5,7 @@
 'use strict';
 
 const STORE_KEY = 'pw_account_book_v1';
-const APP_VERSION = '1.3.1';
+const APP_VERSION = '1.3.2';
 const PALETTE = ['#3498db','#27ae90','#e67e22','#9b59b6','#f1c40f','#e74c3c',
                  '#1abc9c','#34495e','#16a085','#d35400','#8e44ad','#2ecc71',
                  '#f39c12','#c0392b','#2980b9','#7f8c8d'];
@@ -37,10 +37,12 @@ function idbGet(key){
 }
 function idbSet(key, val){
  return idbOpen().then(db => new Promise((resolve, reject) => {
- const req = db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).put(val, key);
- req.onsuccess = () => resolve();
- req.onerror = () => reject(req.error);
- }));
+ const tx = db.transaction(IDB_STORE, 'readwrite');
+ tx.objectStore(IDB_STORE).put(val, key);
+ tx.oncomplete = () => resolve(); // 等事务提交完成才算写入成功，保证落盘
+ tx.onerror = () => reject(tx.error);
+ tx.onabort = () => reject(tx.error || new Error('idb transaction aborted'));
+}));
 }
 function idbClear(){
  return idbOpen().then(db => new Promise((resolve, reject) => {
@@ -107,8 +109,8 @@ function save(){
 }
 function saveNow(){
  clearTimeout(saveTimer);
- if (!idbReady) return;
- idbSet('state', state).catch(e => console.warn('保存失败', e));
+ if (!idbReady) return Promise.resolve();
+ return idbSet('state', state).catch(e => console.warn('保存失败', e));
 }
 window.addEventListener('beforeunload', saveNow);
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveNow(); });

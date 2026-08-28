@@ -46,23 +46,28 @@ async function init(){
 
 /* 强制刷新获取最新代码（数据在 IndexedDB，不会丢失） */
 function forceRefresh(){
-  state.seenVersion = APP_VERSION; save();
-  // 先清空 SW 缓存再刷新，确保下次加载拿到的是最新代码而非本地旧缓存
-  if ('caches' in window) {
-    caches.keys()
-      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
-      .catch(() => {})
-      .finally(() => location.reload());
-  } else {
-    location.reload();
-  }
+  state.seenVersion = APP_VERSION;
+  // localStorage 同步写入兜底（同步写不会被页面关闭打断），确保刷新后不再重复弹更新提示
+  try { localStorage.setItem('pw_seen_version', APP_VERSION); } catch(e) {}
+  // 等 IndexedDB 事务提交（最多 2 秒）后再清缓存刷新，确保 seenVersion 真正落盘
+  Promise.race([saveNow(), new Promise(r => setTimeout(r, 2000))]).finally(() => {
+    if ('caches' in window) {
+      caches.keys()
+        .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+        .catch(() => {})
+        .finally(() => location.reload());
+    } else {
+      location.reload();
+    }
+  });
 }
 
 /* 老用户检测版本更新并提示 */
 function checkUpdate(){
   const banner = qs('updateBanner');
   if (!banner) return;
-  if (state.seenVersion && state.seenVersion !== APP_VERSION){
+  const seen = state.seenVersion || (function(){ try { return localStorage.getItem('pw_seen_version') || ''; } catch(e) { return ''; } })();
+  if (seen && seen !== APP_VERSION){
     banner.hidden = false;
     qs('ubText').textContent = `🎉 已更新到 v${APP_VERSION}，点「刷新」应用最新功能`;
   }
